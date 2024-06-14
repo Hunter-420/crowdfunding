@@ -1,9 +1,10 @@
 "use client";
-import Header from "./Header/Header";
+import Header from "../Header/Header";
 import { themes } from "./Themes";
 import { ThemeProvider, createGlobalStyle, styled } from "styled-components";
-import { useState } from "react";
+import { useState, createContext } from "react";
 
+export const App = createContext();
 const GlobalStyle = createGlobalStyle`
   body {
     margin: 0;
@@ -22,13 +23,15 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <ThemeProvider theme={themes[theme]}>
-      <GlobalStyle />
-      <LayoutWrapper onClick={toggleTheme}>
-        <Header />
-        {children}
-      </LayoutWrapper>
-    </ThemeProvider>
+    <App.Provider value={{ toggleTheme, theme }}>
+      <ThemeProvider theme={themes[theme]}>
+        <GlobalStyle />
+        <LayoutWrapper>
+          <Header />
+          {children}
+        </LayoutWrapper>
+      </ThemeProvider>
+    </App.Provider>
   );
 };
 
