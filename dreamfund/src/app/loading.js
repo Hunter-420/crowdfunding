@@ -8,8 +8,8 @@ const loading = () => {
       <ReactLoading
         type="bubbles"
         color="rgb(137, 105, 182)"
-        height={300}
-        width={300}
+        height={200}
+        width={200}
       />
     </Loader>
   );
