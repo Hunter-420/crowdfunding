@@ -15,7 +15,7 @@ export const validateFormData = (data) => {
     errors.image = "Image is required.";
   }
 
-  if (!data.story.trim()) {
+  if (!data.story) {
     errors.story = "Story is required.";
   }
 

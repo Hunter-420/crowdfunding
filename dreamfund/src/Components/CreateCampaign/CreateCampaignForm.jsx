@@ -5,32 +5,55 @@ import styled from "styled-components";
 import FileInput from "./FileInput";
 import { useRouter } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
+import { uploadFile } from "@/Global/ipfs";
 import { validateFormData } from "./vaildateForm";
 const initialValue = {
   title: "",
   requiredAmount: "",
   image: null,
-  story: "",
+  story: null,
   category: "",
 };
 const CreateCampaignForm = () => {
   const router = useRouter();
   const [formData, setFormData] = useState(initialValue);
-  const { isValid, errors } = validateFormData(formData);
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleFileUpload = async () => {
+    // Upload image and story to IPFS
+    const imageHash = formData.image ? await uploadFile(formData.image) : "";
+    const storyHash = formData.story ? await uploadFile(formData.story) : "";
+    // update the formadata after uploading  image and  story to ipfs
+    const updatedFormData = {
+      ...formData,
+      image: imageHash,
+      story: storyHash,
+    };
 
+    setFormData(updatedFormData);
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { isValid, errors } = validateFormData(formData);
     if (!isValid) {
+      setErrors(errors);
       toast.error("Please try again later");
       return;
     }
-    console.log("Form value", formData);
-    toast.success(" New campaign created Successfully ");
-    setFormData(initialValue);
-    router.push("/");
+
+    try {
+      await handleFileUpload();
+      console.log("Form value", formData);
+      toast.success("New campaign created successfully");
+      setFormData(initialValue);
+      router.push("/");
+    } catch (error) {
+      toast.error("Failed to create campaign. Please try again.");
+      console.error("Error in handleSubmit:", error);
+    }
   };
 
   return (
@@ -39,7 +62,7 @@ const CreateCampaignForm = () => {
       <Header>Create your Campaign</Header>
       <FormWrapper onSubmit={handleSubmit}>
         {campaignData.map((field, index) => (
-          <FieldWrapper key={field.id} index={index}>
+          <FieldWrapper key={field.id} $index={index}>
             <label htmlFor={field.id}>{field.label}</label>
             {field.type === "select" ? (
               <>
@@ -51,8 +74,8 @@ const CreateCampaignForm = () => {
                     </option>
                   ))}
                 </select>
-                {errors.category && (
-                  <ErrorMessage>{errors.category}</ErrorMessage>
+                {errors[field.name] && (
+                  <ErrorMessage>{errors[field.name]}</ErrorMessage>
                 )}
               </>
             ) : field.type === "textarea" ? (
@@ -64,7 +87,9 @@ const CreateCampaignForm = () => {
                   rows={5}
                   onChange={handleChange}
                 />
-                {errors.story && <ErrorMessage>{errors.story}</ErrorMessage>}
+                {errors[field.name] && (
+                  <ErrorMessage>{errors[field.name]}</ErrorMessage>
+                )}
               </>
             ) : field.type === "file" ? (
               <>
@@ -73,7 +98,9 @@ const CreateCampaignForm = () => {
                   setFormData={setFormData}
                   formData={formData}
                 />
-                {errors.image && <ErrorMessage>{errors.image}</ErrorMessage>}
+                {errors[field.name] && (
+                  <ErrorMessage>{errors[field.name]}</ErrorMessage>
+                )}
               </>
             ) : (
               <>
@@ -91,7 +118,9 @@ const CreateCampaignForm = () => {
           </FieldWrapper>
         ))}
         <ButtonWrapper>
-          <button type="button">Upload Image on IPFS</button>
+          <button type="button" onClick={handleFileUpload}>
+            Upload Image on IPFS
+          </button>
           <button type="submit">Submit</button>
         </ButtonWrapper>
       </FormWrapper>
@@ -143,8 +172,8 @@ const FormWrapper = styled.form`
 `;
 
 const FieldWrapper = styled.div`
-  grid-column: ${(props) => (props.index === 3 ? "span 3" : "auto")};
-  grid-row: ${(props) => (props.index === 3 ? "span 2" : "auto")};
+  grid-column: ${(props) => (props.$index === 3 ? "span 3" : "auto")};
+  grid-row: ${(props) => (props.$index === 3 ? "span 2" : "auto")};
 
   & > label {
     display: block;
@@ -174,7 +203,7 @@ const FieldWrapper = styled.div`
   }
 
   @media (max-width: 768px) {
-    grid-column: ${(props) => (props.index === 3 ? "span 2" : "auto")};
+    grid-column: ${(props) => (props.$index === 3 ? "span 2" : "auto")};
     grid-row: auto;
   }
 
