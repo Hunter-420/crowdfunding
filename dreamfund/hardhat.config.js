@@ -1,25 +1,38 @@
-const { task } = require("hardhat/config");
-require("dotenv").config({ path: "./.env.local" });
-require("@nomicfoundation/hardhat-toolbox");
+require("@nomiclabs/hardhat-ethers");
+require('dotenv').config({ path: './.env.local' });
 
-/** @type import('hardhat/config').HardhatUserConfig */
 
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
 const privateKey = process.env.NEXT_PUBLIC_PRIVATE_KEY;
 
 module.exports = {
-  solidity: "0.8.24",
   defaultNetwork: "polygon",
   networks: {
-    hardhat: {},
+    hardhat: {
+    },
     polygon: {
       url: process.env.NEXT_PUBLIC_RPC_URL,
-      accounts: [privateKey],
-    },
+      accounts: [privateKey]
+    }
   },
-};
+  solidity: {
+    version: "0.8.10",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
+  paths: {
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
+  },
+  mocha: {
+    timeout: 20000
+  }
+}
+
+
+// 0xC70BB589700e378D49A679507026380C93305909
