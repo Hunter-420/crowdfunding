@@ -4,12 +4,14 @@ export const campaignData = [
     id: "title",
     name: "title",
     type: "text",
+    placeholder: "Title ",
   },
   {
     label: "Required Amount",
     id: "requiredAmount",
     name: "requiredAmount",
     type: "text",
+    placeholder: "Amount",
   },
   {
     label: " Choose Category",
@@ -23,11 +25,15 @@ export const campaignData = [
     id: "story",
     name: "story",
     type: "textarea",
+    placeholder: "Write short notes about your story",
   },
   {
     label: "Upload Image",
     id: "image",
     name: "image",
-    type: "file",
+    type: "text",
+    placeholder: "Enter your image url",
   },
 ];
+
+export const category = ["animal", "health", "education", "environment"];
