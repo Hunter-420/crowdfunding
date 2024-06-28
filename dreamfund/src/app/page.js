@@ -1,18 +1,27 @@
 "use client";
+import Card from "@/Components/Card/Card";
 import { category } from "@/Components/CreateCampaign/campaignData";
 import styled from "styled-components";
 export default function Home() {
   return (
-    <div>
+    <DashboardWrapper>
       <CategoryWrapper>
         {category.map((data, i) => (
           <Category key={i}>{data}</Category>
         ))}
       </CategoryWrapper>
-      <p></p>
-    </div>
+      <div>
+        <Card />
+      </div>
+    </DashboardWrapper>
   );
 }
+const DashboardWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0px 20px;
+`;
 
 const CategoryWrapper = styled.div`
   display: flex;

@@ -81,7 +81,11 @@ const Wallet = () => {
     <>
       <Toaster position="top-right" reverseOrder={false} />
       <WalletWrapper onClick={connectWallet}>
-        {balance == "" ? " " : <Balance>{balance} </Balance>}
+        {balance == "" ? (
+          <Balance></Balance>
+        ) : (
+          <Balance>{balance && balance.slice(0, 4)} Matic </Balance>
+        )}
         {address == "" ? (
           <Address>Connect Wallet </Address>
         ) : (
@@ -114,6 +118,7 @@ const Address = styled.p`
   display: flex;
   justify-items: center;
   align-items: center;
+  margin: 0px 6px;
   color: ${(props) => props.theme.color};
   transition: background-color 0.3s, border-radius 0.3s, padding 0.3s;
 `;
