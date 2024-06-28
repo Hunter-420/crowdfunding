@@ -1,12 +1,11 @@
-import CreateCampaignForm from "@/Components/CreateCampaign/CreateCampaignForm";
 import React from "react";
-
-const CreateCampaignsPage = () => {
+import Form from "@/Components/CreateCampaign/Form";
+const createCampaignPage = () => {
   return (
     <div>
-      <CreateCampaignForm />
+      <Form />
     </div>
   );
 };
 
-export default CreateCampaignsPage;
+export default createCampaignPage;

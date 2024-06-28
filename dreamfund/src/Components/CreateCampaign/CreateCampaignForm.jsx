@@ -1,43 +1,33 @@
 "use client";
-import React, { useState } from "react";
-import { campaignData } from "./campaignData";
+import React, { useContext } from "react";
+import { FormContext } from "./Form";
 import styled from "styled-components";
 import FileInput from "./FileInput";
-import { useRouter } from "next/navigation";
 import { Toaster, toast } from "react-hot-toast";
-import { uploadFile } from "@/Global/ipfs";
 import { validateFormData } from "./vaildateForm";
-const initialValue = {
-  title: "",
-  requiredAmount: "",
-  image: null,
-  story: null,
-  category: "",
-};
+import { checkIfImage } from "@/app/utilis";
+import { useRouter } from "next/navigation";
+import { campaignData } from "./campaignData";
 const CreateCampaignForm = () => {
+  const {
+    formData,
+    setFormData,
+    handleChange,
+    errors,
+    setErrors,
+    loading,
+    setLoading,
+    address,
+    setAddress,
+    startCampaign,
+  } = useContext(FormContext);
+
   const router = useRouter();
-  const [formData, setFormData] = useState(initialValue);
-  const [errors, setErrors] = useState({});
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  const handleFileUpload = async () => {
-    // Upload image and story to IPFS
-    const imageHash = formData.image ? await uploadFile(formData.image) : "";
-    const storyHash = formData.story ? await uploadFile(formData.story) : "";
-    // update the formadata after uploading  image and  story to ipfs
-    const updatedFormData = {
-      ...formData,
-      image: imageHash,
-      story: storyHash,
-    };
-
-    setFormData(updatedFormData);
-  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { isValid, errors } = validateFormData(formData);
+    console.log("🚀 ~ handleSubmit ~ formData:", formData);
     if (!isValid) {
       setErrors(errors);
       toast.error("Please try again later");
@@ -45,12 +35,34 @@ const CreateCampaignForm = () => {
     }
 
     try {
-      await handleFileUpload();
-      console.log("Form value", formData);
-      toast.success("New campaign created successfully");
-      setFormData(initialValue);
-      router.push("/");
+      checkIfImage(formData.image, async (exists) => {
+        if (exists) {
+          setLoading(true);
+
+          const success = await startCampaign();
+
+          if (success) {
+            toast.success("New campaign created successfully");
+            setFormData({
+              title: "",
+              requiredAmount: "",
+              image: "",
+              story: "",
+              category: "",
+            });
+            router.push("/");
+          } else {
+            toast.error("Failed to create campaign. Please try again.");
+          }
+
+          setLoading(false);
+        } else {
+          toast.error("Provide valid image URL");
+          setFormData({ ...formData, image: "" });
+        }
+      });
     } catch (error) {
+      setLoading(false);
       toast.error("Failed to create campaign. Please try again.");
       console.error("Error in handleSubmit:", error);
     }
@@ -67,7 +79,7 @@ const CreateCampaignForm = () => {
             {field.type === "select" ? (
               <>
                 <select name={field.name} id={field.id} onChange={handleChange}>
-                  <option value="">Select {field.label}</option>
+                  <option value="">Select</option>
                   {field.options.map((option, i) => (
                     <option key={option + i} value={option}>
                       {option}
@@ -85,6 +97,7 @@ const CreateCampaignForm = () => {
                   name={field.name}
                   cols={20}
                   rows={5}
+                  placeholder={field.placeholder}
                   onChange={handleChange}
                 />
                 {errors[field.name] && (
@@ -109,6 +122,7 @@ const CreateCampaignForm = () => {
                   type={field.type}
                   name={field.name}
                   onChange={handleChange}
+                  placeholder={field.placeholder}
                 />
                 {errors[field.name] && (
                   <ErrorMessage>{errors[field.name]}</ErrorMessage>
@@ -118,9 +132,6 @@ const CreateCampaignForm = () => {
           </FieldWrapper>
         ))}
         <ButtonWrapper>
-          <button type="button" onClick={handleFileUpload}>
-            Upload Image on IPFS
-          </button>
           <button type="submit">Submit</button>
         </ButtonWrapper>
       </FormWrapper>
@@ -129,7 +140,6 @@ const CreateCampaignForm = () => {
 };
 
 export default CreateCampaignForm;
-
 const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -173,7 +183,7 @@ const FormWrapper = styled.form`
 
 const FieldWrapper = styled.div`
   grid-column: ${(props) => (props.$index === 3 ? "span 3" : "auto")};
-  grid-row: ${(props) => (props.$index === 3 ? "span 2" : "auto")};
+  grid-row: ${(props) => (props.$index === 3 || 4 ? "span 2" : "auto")};
 
   & > label {
     display: block;
@@ -188,7 +198,7 @@ const FieldWrapper = styled.div`
     width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 10px;
     box-sizing: border-box;
     outline: none;
     font-size: 1rem;
@@ -202,8 +212,10 @@ const FieldWrapper = styled.div`
     resize: vertical;
   }
 
+  grid-row: ${(props) => (props.$index === 3 || 4 ? "span 2" : "auto")};
+
   @media (max-width: 768px) {
-    grid-column: ${(props) => (props.$index === 3 ? "span 2" : "auto")};
+    grid-column: ${(props) => (props.$index === 3 || 4 ? "span 2" : "auto")};
     grid-row: auto;
   }
 
