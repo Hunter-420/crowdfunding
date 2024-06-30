@@ -1,14 +1,14 @@
-import React from "react";
+"use client";
+import styled from "styled-components";
+import { useState } from "react";
+import { ethers } from "ethers";
 import Image from "next/image";
 import {
   FaBitcoin,
   FaAddressCard,
   FaFilter,
-  FaHandHoldingUsd,
-  FaBullseye,
-  FaArrowUp,
+  FaRegCalendar,
 } from "react-icons/fa";
-import styled from "styled-components";
 
 const CardContainer = styled.div`
   display: flex;
@@ -54,6 +54,7 @@ const CardContainer = styled.div`
   .category,
   .story,
   .address,
+  .date,
   .raised,
   .total,
   .initial {
@@ -61,14 +62,12 @@ const CardContainer = styled.div`
   }
 `;
 
-const Card = () => {
+const Card = ({ campaign }) => {
   return (
     <CardContainer>
       <div>
         <Image
-          src={
-            "https://images.unsplash.com/photo-1719216325263-9070d79336c3?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90b3MtZmVlZHw4fHx8ZW58MHx8fHx8"
-          }
+          src={`https://images.unsplash.com/photo-${campaign.image}`}
           alt="campaign"
           height={300}
           width={300}
@@ -77,39 +76,28 @@ const Card = () => {
       <div className="details">
         <div className="icon-text">
           <FaFilter />
-          <div className="category">Category</div>
+          <div className="category">{campaign.category}</div>
         </div>
-        <div className="title">Title of Campaign</div>
-        <div className="story">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptatem,
-          quasi.
-        </div>
+        <div className="title">{campaign.title}</div>
+        {/* <div className="story">{campaign.story}</div> */}
         <div className="icon-text">
           <FaBitcoin />
-          <div>100 Matic</div>
+          <div>{campaign.amount} Matic</div>
         </div>
         <div className="icon-text">
           <FaAddressCard />
-          <div className="address">100cvjshd8erye</div>
+          <div className="address">
+            {campaign.owner.slice(0, 6)}...{campaign.owner.slice(39)}
+          </div>
         </div>
-        {/* <div className="fund">
-          <div className="icon-text">
-            <FaHandHoldingUsd />
-            <div className="raised">Raised: 50 Matic</div>
+        <div className="icon-text">
+          <FaRegCalendar />
+          <div className="date">
+            {new Date(campaign.timeStamp * 1000).toLocaleDateString()}
           </div>
-
-          <div className="icon-text">
-            <FaBullseye />
-            <div className="total">Total Required: 150 Matic</div>
-          </div>
-        </div> */}
-        {/* <div className="icon-text">
-          <FaArrowUp />
-          <div className="initial">Initially Asked: 200 Matic</div>
-        </div> */}
+        </div>
       </div>
     </CardContainer>
   );
 };
-
 export default Card;
