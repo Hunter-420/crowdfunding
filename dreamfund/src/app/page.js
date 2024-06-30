@@ -1,22 +1,75 @@
 "use client";
-import Card from "@/Components/Card/Card";
-import { category } from "@/Components/CreateCampaign/campaignData";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
+import Card from "@/Components/Card/Card";
+import { fetchCampaigns } from "@/lib/fetchCampaign";
+
 export default function Home() {
+  const [filter, setFilter] = useState([]);
+  const [allData, setAllData] = useState([]);
+
+  useEffect(() => {
+    async function loadData() {
+      const data = await fetchCampaigns();
+      setAllData(data);
+      setFilter(data);
+    }
+
+    loadData();
+  }, []);
+
   return (
-    <DashboardWrapper>
+    <HomeWrapper>
       <CategoryWrapper>
-        {category.map((data, i) => (
-          <Category key={i}>{data}</Category>
-        ))}
+        <Category onClick={() => setFilter(allData)}>All</Category>
+        <Category
+          onClick={() =>
+            setFilter(
+              allData.filter((campaign) => campaign.category === "health")
+            )
+          }
+        >
+          Health
+        </Category>
+        <Category
+          onClick={() =>
+            setFilter(
+              allData.filter((campaign) => campaign.category === "education")
+            )
+          }
+        >
+          Education
+        </Category>
+        <Category
+          onClick={() =>
+            setFilter(
+              allData.filter((campaign) => campaign.category === "animal")
+            )
+          }
+        >
+          Animal
+        </Category>
+        <Category
+          onClick={() =>
+            setFilter(
+              allData.filter((campaign) => campaign.category === "environment")
+            )
+          }
+        >
+          Environment
+        </Category>
       </CategoryWrapper>
-      <div>
-        <Card />
-      </div>
-    </DashboardWrapper>
+
+      <CardsWrapper>
+        {filter.map((campaign, i) => (
+          <Card key={i} campaign={campaign} />
+        ))}
+      </CardsWrapper>
+    </HomeWrapper>
   );
 }
-const DashboardWrapper = styled.div`
+
+const HomeWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -28,8 +81,6 @@ const CategoryWrapper = styled.div`
   text-transform: capitalize;
   width: 60%;
   margin-top: 20px;
-
-  /* margin-left: 10px; */
   justify-content: space-evenly;
 `;
 
@@ -45,4 +96,12 @@ const Category = styled.div`
   &:hover {
     background-color: ${(props) => props.theme.bgSubDiv};
   }
+`;
+
+const CardsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  width: 80%;
+  margin-top: 25px;
 `;
